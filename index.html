@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamMax - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #0b0e14; color: #c9d1d9; font-family: system-ui, -apple-system, sans-serif; }
+    .navbar { background-color: #161b22; border-bottom: 1px solid #21262d; }
+    .card-custom { background-color: #161b22; border: 1px solid #30363d; border-radius: 12px; }
+    
+    .table-dark-custom { background-color: #161b22; color: #c9d1d9; border-color: #30363d; }
+    .table-dark-custom th { background-color: #0d1117 !important; color: #8b949e !important; border-bottom: 1px solid #30363d !important; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
+    .table-dark-custom td { background-color: #161b22 !important; color: #e6edf3 !important; border-bottom: 1px solid #21262d !important; vertical-align: middle; }
+    
+    .btn-purple { background-color: #6e40c9; color: #fff; border: none; }
+    .btn-purple:hover { background-color: #5a32a3; color: #fff; }
+    .btn-action { background-color: #21262d; color: #c9d1d9; border: 1px solid #363b42; text-decoration: none; }
+    .btn-action:hover { background-color: #30363d; color: #fff; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center fw-bold text-white fs-4" href="#">
+        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;">
+          <i class="fa-solid fa-play fs-6"></i>
+        </div>
+        StreamMax
+      </a>
+      <div class="d-flex align-items-center gap-2">
+        <a href="#uploadSection" class="btn btn-purple px-3 py-2"><i class="fa-solid fa-upload me-1"></i> Upload Video</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    
+    <!-- Upload Section -->
+    <div id="uploadSection" class="card card-custom p-4 mb-5">
+      <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-cloud-arrow-up me-2 text-primary"></i>Unggah Video Baru</h5>
+      <form id="uploadForm">
+        <div class="mb-3">
+          <label class="form-label text-muted small">1. Password Secret Admin</label>
+          <input type="password" id="secretInput" class="form-control bg-dark text-light border-secondary" placeholder="Masukkan password admin..." required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-muted small">2. Pilih Berkas Video</label>
+          <input type="file" id="videoInput" class="form-control bg-dark text-light border-secondary" accept="video/*" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-muted small">3. Judul Custom (Opsional)</label>
+          <input type="text" id="titleInput" class="form-control bg-dark text-light border-secondary" placeholder="Masukkan judul video baru di sini...">
+        </div>
+        <button type="submit" id="uploadBtn" class="btn btn-purple px-4 fw-bold">
+          <i class="fa-solid fa-upload me-2"></i>Mulai Proses Upload
+        </button>
+      </form>
+      <div id="uploadProgress" class="progress mt-3 d-none" style="height: 10px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-purple" role="progressbar" style="width: 100%"></div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="card card-custom p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+          <h5 class="fw-bold text-white mb-1"><i class="fa-solid fa-list me-2 text-primary"></i>Daftar Video Ter-host</h5>
+          <p class="text-muted small mb-0">Kelola dan ambil tautan pemutar untuk semua video Anda.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <input type="text" id="searchInput" class="form-control bg-dark text-light border-secondary form-control-sm" placeholder="Cari judul video...">
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-dark-custom align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Judul Video</th>
+              <th>Ukuran</th>
+              <th>Tanggal</th>
+              <th class="text-end">Aksi & Tautan</th>
+            </tr>
+          </thead>
+          <tbody id="videoTableBody">
+            <tr>
+              <td colspan="4" class="text-center py-4 text-muted">
+                <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat daftar video...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Player -->
+  <div class="modal fade" id="playerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content card-custom text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold" id="modalVideoTitle">Putar Video</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="ratio ratio-16x9 bg-black">
+            <iframe id="modalIframe" src="" allowfullscreen></iframe>
+          </div>
+        </div>
+        <div class="modal-footer border-secondary justify-content-between">
+          <input type="text" id="modalEmbedCode" class="form-control bg-dark text-light border-secondary w-75" readonly>
+          <button class="btn btn-purple" onclick="copyEmbedFromModal()"><i class="fa-solid fa-copy me-1"></i>Salin Kode Embed</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center text-muted small py-4">
+    StreamMax © 2026.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let allVideos = [];
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async function loadVideos() {
+      const tbody = document.getElementById('videoTableBody');
+      try {
+        const res = await fetch('/api/videos');
+        const data = await res.json();
+        
+        if (data.success && data.videos && data.videos.length > 0) {
+          allVideos = data.videos;
+          renderTable(allVideos);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">Belum ada video yang diunggah.</td></tr>';
+        }
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-danger">Gagal memuat daftar video.</td></tr>';
+      }
+    }
+
+    function renderTable(videos) {
+      const tbody = document.getElementById('videoTableBody');
+      if (videos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">Video tidak ditemukan.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = videos.map(v => `
+        <tr>
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="fa-solid fa-circle-play text-primary fs-5 me-3"></i>
+              <span class="fw-semibold text-white">${v.title}</span>
+            </div>
+          </td>
+          <td class="text-muted small">${formatBytes(v.size)}</td>
+          <td class="text-muted small">${new Date(v.uploadedAt).toISOString().split('T')[0]}</td>
+          <td class="text-end">
+            <button onclick="playVideo('${v.embedUrl}', '${v.title}')" class="btn btn-sm btn-action me-1">
+              <i class="fa-solid fa-play me-1 text-primary"></i>Putar
+            </button>
+            <a href="${v.watchUrl}" target="_blank" class="btn btn-sm btn-action me-1">
+              <i class="fa-solid fa-arrow-up-right-from-square me-1 text-info"></i>Halaman
+            </a>
+            <button onclick="copyText('<iframe src=\\'${v.embedUrl}\\' width=\\'100%\\' height=\\'100%\\' frameborder=\\'0\\' allowfullscreen></iframe>')" class="btn btn-sm btn-action me-1">
+              <i class="fa-solid fa-code me-1 text-secondary"></i>Embed
+            </button>
+            <button onclick="deleteVideo('${v.id}', '${v.title}')" class="btn btn-sm btn-action text-danger" title="Hapus Video">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function deleteVideo(videoId, title) {
+      const secret = prompt(`Masukkan Password Secret Admin untuk menghapus "${title}":`);
+      if (!secret) return;
+
+      try {
+        const res = await fetch(`/api/delete?id=${videoId}`, { 
+          method: 'DELETE',
+          headers: { 'x-secret-key': secret }
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Video berhasil dihapus!');
+          loadVideos();
+        } else {
+          alert('Gagal: ' + data.error);
+        }
+      } catch (err) {
+        alert('Terjadi kesalahan saat menghapus video.');
+      }
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const secretInput = document.getElementById('secretInput');
+      const fileInput = document.getElementById('videoInput');
+      const titleInput = document.getElementById('titleInput');
+      const uploadBtn = document.getElementById('uploadBtn');
+      const progress = document.getElementById('uploadProgress');
+
+      if (!fileInput.files[0]) return;
+
+      const formData = new FormData();
+      formData.append('secret_key', secretInput.value);
+      formData.append('video', fileInput.files[0]);
+      formData.append('title', titleInput.value.trim());
+
+      uploadBtn.disabled = true;
+      progress.classList.remove('d-none');
+
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+          alert('Video berhasil diunggah!');
+          fileInput.value = '';
+          titleInput.value = '';
+          loadVideos();
+        } else {
+          alert('Gagal unggah: ' + data.error);
+        }
+      } catch (err) {
+        alert('Terjadi kesalahan saat unggah video.');
+      } finally {
+        uploadBtn.disabled = false;
+        progress.classList.add('d-none');
+      }
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const keyword = e.target.value.toLowerCase();
+      const filtered = allVideos.filter(v => v.title.toLowerCase().includes(keyword));
+      renderTable(filtered);
+    });
+
+    function playVideo(embedUrl, title) {
+      document.getElementById('modalVideoTitle').innerText = title;
+      document.getElementById('modalIframe').src = embedUrl;
+      document.getElementById('modalEmbedCode').value = `<iframe src="${embedUrl}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>`;
+      const modal = new bootstrap.Modal(document.getElementById('playerModal'));
+      modal.show();
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text);
+      alert('Kode Embed berhasil disalin!');
+    }
+
+    function copyEmbedFromModal() {
+      const input = document.getElementById('modalEmbedCode');
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      alert('Kode Embed berhasil disalin!');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadVideos);
+  </script>
+</body>
+</html>
